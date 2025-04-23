@@ -16,6 +16,18 @@ export default function SubscriptionPage() {
 
   const handleSubscribe = async (planId: string) => {
     if (!authState.user) return toast.error("Please login first.");
+    
+    // Special handling for free plan
+    if (planId === 'free_plan') {
+      setIsProcessing(planId);
+      setTimeout(async () => {
+        toast.success("Switched to Free plan");
+        await refetch();
+        setIsProcessing("");
+      }, 500);
+      return;
+    }
+
     setIsProcessing(planId);
     // This is where Polar Payments integration would happen (pseudo, since not real API)
     // You would open the payment modal, get Stripe token/session, etc. We'll simulate for now.
@@ -42,12 +54,14 @@ export default function SubscriptionPage() {
                   currentPlanId === plan.id
                     ? "border-primary bg-primary/10"
                     : "border-border bg-card"
-                }`}
+                } ${plan.price_cents === 0 ? "border-green-500" : ""}`}
               >
                 <h2 className="text-xl font-bold mb-1">{plan.name}</h2>
                 <p className="mb-2 text-muted-foreground">{plan.description}</p>
                 <div className="text-3xl font-extrabold mb-2">
-                  ${ (plan.price_cents / 100).toFixed(2) }
+                  {plan.price_cents === 0 
+                    ? "Free" 
+                    : `$${(plan.price_cents / 100).toFixed(2)}`}
                 </div>
                 <div className="mb-6 text-xs text-muted-foreground">
                   Upload up to <span className="font-semibold">{plan.file_limit}</span> files
