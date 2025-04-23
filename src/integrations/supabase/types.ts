@@ -9,7 +9,71 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      plans: {
+        Row: {
+          description: string | null
+          file_limit: number
+          id: string
+          name: string
+          price_cents: number
+        }
+        Insert: {
+          description?: string | null
+          file_limit: number
+          id: string
+          name: string
+          price_cents: number
+        }
+        Update: {
+          description?: string | null
+          file_limit?: number
+          id?: string
+          name?: string
+          price_cents?: number
+        }
+        Relationships: []
+      }
+      user_subscriptions: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          plan_id: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          plan_id: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          plan_id?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

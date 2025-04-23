@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
@@ -35,6 +34,9 @@ export default function Navbar() {
           </div>
           
           <div className="flex items-center space-x-4">
+            <Link to="/subscription" className="text-primary font-medium hover:underline">
+              Upgrade
+            </Link>
             {authState.isAuthenticated ? (
               <>
                 <span className="hidden md:block text-sm text-muted-foreground">
