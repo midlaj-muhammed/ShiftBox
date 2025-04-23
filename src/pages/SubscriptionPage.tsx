@@ -15,15 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { createClient } from "@supabase/supabase-js";
-
-// Utility - get supabase client with anon/public key from environment
-function getSupabaseClient() {
-  return createClient(
-    "https://ettrfzupsducalseyyzd.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0dHJmenVwc2R1Y2Fsc2V5eXpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzOTExMzcsImV4cCI6MjA2MDk2NzEzN30.CZ1aC_4i10ifaNhSDzlU0V3XzV_bOzfz2Fvk3lctRDs"
-  );
-}
+import { supabase } from "@/integrations/supabase/client";
 
 export default function SubscriptionPage() {
   const { authState } = useAuth();
@@ -59,7 +51,6 @@ export default function SubscriptionPage() {
     // Real payment gateway integration for paid plans
     try {
       toast.info("Contacting payment gateway...");
-      const supabase = getSupabaseClient();
 
       // Call the "create-checkout" edge function to get Polar payment link
       let priceCents = plans?.find(p => p.id === planId)?.price_cents || 0;
@@ -73,11 +64,14 @@ export default function SubscriptionPage() {
       });
 
       if (error || !data?.url) {
+        console.error("Error from checkout function:", error);
         throw new Error(error?.message || "Failed to start payment session.");
       }
 
+      console.log("Received checkout URL:", data.url);
       window.location.href = data.url; // Redirect to Polar checkout
     } catch (e: any) {
+      console.error("Subscription error:", e);
       toast.error(e.message || "Could not start payment process.");
       setIsProcessing("");
     }

@@ -14,38 +14,46 @@ async function createPolarCheckout(planId: string, amountCents: number, email: s
   const apiKey = Deno.env.get("POLAR_API_KEY");
   
   if (!apiKey) {
+    console.error("Missing environment variable: POLAR_API_KEY");
     throw new Error("POLAR_API_KEY is not set in the environment");
   }
 
   console.log(`Creating Polar checkout for plan: ${planId}, amount: ${amountCents}, email: ${email}`);
 
-  // Call Polar API to create a checkout session - using the payment links endpoint
-  const response = await fetch("https://api.polar.sh/v1/checkout", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      amount_cents: amountCents,
-      email: email,
-      success_url: `${Deno.env.get("SITE_URL") || "https://ettrfzupsducalseyyzd.supabase.co"}/dashboard`,
-      cancel_url: `${Deno.env.get("SITE_URL") || "https://ettrfzupsducalseyyzd.supabase.co"}/subscription`,
-      metadata: {
-        plan_id: planId
-      }
-    }),
-  });
+  try {
+    // Call Polar API to create a checkout session
+    const response = await fetch("https://api.polar.sh/v1/checkout", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        amount_cents: amountCents,
+        email: email,
+        success_url: `${Deno.env.get("SITE_URL") || "https://ettrfzupsducalseyyzd.supabase.co"}/dashboard`,
+        cancel_url: `${Deno.env.get("SITE_URL") || "https://ettrfzupsducalseyyzd.supabase.co"}/subscription`,
+        metadata: {
+          plan_id: planId
+        }
+      }),
+    });
 
-  const data = await response.json();
-  
-  if (!response.ok) {
-    console.error("Polar API Error Response:", data);
-    throw new Error(`Polar API error (${response.status}): ${data.detail || data.message || JSON.stringify(data)}`);
+    console.log(`Polar API response status: ${response.status}`);
+    
+    const data = await response.json();
+    
+    if (!response.ok) {
+      console.error("Polar API Error Response:", data);
+      throw new Error(`Polar API error (${response.status}): ${data.detail || data.message || JSON.stringify(data)}`);
+    }
+
+    console.log("Polar checkout created:", data);
+    return data;
+  } catch (error) {
+    console.error("Error creating Polar checkout:", error.message);
+    throw error;
   }
-
-  console.log("Polar checkout created:", data);
-  return data;
 }
 
 serve(async (req) => {
@@ -55,6 +63,9 @@ serve(async (req) => {
   }
 
   try {
+    // Log API key existence (not the actual key)
+    console.log(`POLAR_API_KEY exists: ${!!Deno.env.get("POLAR_API_KEY")}`);
+    
     // Parse request body
     const { plan_id, amount, email } = await req.json();
 
