@@ -1,13 +1,22 @@
 
 import { createContext, useState, useContext, useEffect, ReactNode } from "react";
 import { AuthState, User } from "@/types";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface AuthContextType {
   authState: AuthState;
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string, name?: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
+
+// Utility to map Supabase user/session to our `User` type
+const mapSupabaseUser = (supabaseUser: any): User => ({
+  id: supabaseUser.id,
+  email: supabaseUser.email,
+  name: supabaseUser.user_metadata?.name || undefined,
+});
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -26,15 +35,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     isLoading: true,
   });
 
-  // In a real app, this would use an actual authentication service
-  // For now, we'll use localStorage to simulate authentication
   useEffect(() => {
-    const checkAuth = () => {
-      const user = localStorage.getItem("user");
-      if (user) {
+    // Set up the Supabase auth state listener first.
+    const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
         setAuthState({
           isAuthenticated: true,
-          user: JSON.parse(user),
+          user: mapSupabaseUser(session.user),
           isLoading: false,
         });
       } else {
@@ -44,53 +51,77 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           isLoading: false,
         });
       }
-    };
+    });
 
-    checkAuth();
+    // THEN check for an existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setAuthState({
+          isAuthenticated: true,
+          user: mapSupabaseUser(session.user),
+          isLoading: false,
+        });
+      } else {
+        setAuthState({
+          isAuthenticated: false,
+          user: null,
+          isLoading: false,
+        });
+      }
+    });
+
+    return () => {
+      subscription?.unsubscribe();
+    };
   }, []);
 
+  // Login with Supabase
   const login = async (email: string, password: string) => {
-    // Simulate API call with timeout
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    // This would be an actual API call in a real app
-    // For demo purposes, any email/password combination will work
-    const mockUser: User = {
-      id: `user_${Math.random().toString(36).substring(2, 11)}`,
-      email,
-    };
-
-    localStorage.setItem("user", JSON.stringify(mockUser));
-    
+    const { error, data } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      toast.error(error.message || "Failed to login");
+      throw error;
+    }
+    if (!data.session || !data.user) {
+      toast.error("Invalid login or incomplete account.");
+      throw new Error("Login failed: No session returned");
+    }
     setAuthState({
       isAuthenticated: true,
-      user: mockUser,
+      user: mapSupabaseUser(data.user),
       isLoading: false,
     });
   };
 
+  // Signup with Supabase
   const signup = async (email: string, password: string, name?: string) => {
-    // Simulate API call with timeout
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    // Create a mock user
-    const mockUser: User = {
-      id: `user_${Math.random().toString(36).substring(2, 11)}`,
+    const { error, data } = await supabase.auth.signUp({
       email,
-      name,
-    };
-
-    localStorage.setItem("user", JSON.stringify(mockUser));
-    
+      password,
+      options: {
+        data: {
+          name,
+        },
+      },
+    });
+    if (error) {
+      toast.error(error.message || "Failed to create account");
+      throw error;
+    }
+    if (!data.user) {
+      toast.error("Unexpected error during sign up.");
+      throw new Error("Signup failed: No user returned");
+    }
     setAuthState({
-      isAuthenticated: true,
-      user: mockUser,
+      isAuthenticated: true, // Might require email confirmation if enabled
+      user: mapSupabaseUser(data.user),
       isLoading: false,
     });
   };
 
-  const logout = () => {
-    localStorage.removeItem("user");
+  // Logout with Supabase
+  const logout = async () => {
+    await supabase.auth.signOut();
     setAuthState({
       isAuthenticated: false,
       user: null,
