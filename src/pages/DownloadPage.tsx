@@ -21,7 +21,11 @@ export default function DownloadPage() {
         return;
       }
       try {
-        const { data } = supabase.storage.from("user-files").getPublicUrl(fileId);
+        // Decode the fileId from the URL
+        const decodedFileId = decodeURIComponent(fileId);
+        
+        // Get public URL from Supabase
+        const { data } = supabase.storage.from("user-files").getPublicUrl(decodedFileId);
         if (!data?.publicUrl) {
           setIsLoading(false);
           setFileNotFound(true);
@@ -29,7 +33,7 @@ export default function DownloadPage() {
         }
         setDownloadUrl(data.publicUrl);
         // file name extraction for download attribute
-        const fileNameParsed = decodeURIComponent((fileId.split('/').pop() ?? "downloaded_file").replace(/^\d+_/, ""));
+        const fileNameParsed = decodeURIComponent((decodedFileId.split('/').pop() ?? "downloaded_file").replace(/^\d+_/, ""));
         setFileName(fileNameParsed);
         setFileNotFound(false);
       } catch {

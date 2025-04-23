@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Upload, Copy, Link } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 function formatFileSize(bytes: number): string {
   if (bytes === 0) return "0 Bytes";
@@ -21,6 +22,7 @@ export default function UploadAndShare() {
   const [publicUrl, setPublicUrl] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { authState } = useAuth();
 
   const handleSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     setErrorMsg("");
@@ -50,8 +52,13 @@ export default function UploadAndShare() {
     }
     setUploading(true);
     try {
-      // Use a unique filename: timestamp + encoded name
-      const filePath = `public/${Date.now()}_${encodeURIComponent(selectedFile.name)}`;
+      if (!authState.user) {
+        setErrorMsg("You must be logged in to upload files.");
+        setUploading(false);
+        return;
+      }
+      // Use a unique filename with user ID prefix to ensure proper organization
+      const filePath = `${authState.user.id}/${Date.now()}_${encodeURIComponent(selectedFile.name)}`;
       setProgress(10);
       const uploadPromise = supabase
         .storage
@@ -80,7 +87,7 @@ export default function UploadAndShare() {
       if (!urlData?.publicUrl) {
         setErrorMsg("Failed to generate public URL.");
       } else {
-        setPublicUrl(urlData.publicUrl);
+        setPublicUrl(window.location.origin + "/download/" + encodeURIComponent(filePath));
         toast.success("File uploaded successfully!");
       }
     } catch (err: any) {
