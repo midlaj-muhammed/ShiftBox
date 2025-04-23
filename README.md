@@ -53,7 +53,7 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 ### Installation
 Clone the repository and install dependencies:
 ```sh
-git clone <YOUR_GIT_URL>
+git clone https://github.com/midlaj-muhammed/ShiftBox.git
 cd file-share-now
 npm install
 ```
