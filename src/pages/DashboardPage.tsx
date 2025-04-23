@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -19,6 +20,11 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState("upload");
   const { data: userSubscription } = useUserSubscription();
   const { data: plans } = usePlans();
+
+  // Sort files by uploadDate (newest first)
+  const sortedFiles = [...files].sort((a, b) => 
+    new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime()
+  );
 
   let fileLimit = 0;
   if (userSubscription?.plan?.file_limit) {
