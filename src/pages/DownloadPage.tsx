@@ -32,13 +32,13 @@ export default function DownloadPage() {
       
       try {
         // Get file metadata from Supabase storage
-        const { data: fileData, error } = await supabase
+        const { data: fileData } = await supabase
           .storage
           .from("user-files")
           .getPublicUrl(fileId);
           
-        if (error) {
-          console.error("Error fetching file:", error);
+        if (!fileData) {
+          console.error("Error fetching file: No file data returned");
           setIsLoading(false);
           return;
         }
