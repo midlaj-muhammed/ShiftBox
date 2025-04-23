@@ -20,8 +20,8 @@ import { createClient } from "@supabase/supabase-js";
 // Utility - get supabase client with anon/public key from environment
 function getSupabaseClient() {
   return createClient(
-    import.meta.env.VITE_SUPABASE_URL,
-    import.meta.env.VITE_SUPABASE_ANON_KEY
+    "https://ettrfzupsducalseyyzd.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0dHJmenVwc2R1Y2Fsc2V5eXpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzOTExMzcsImV4cCI6MjA2MDk2NzEzN30.CZ1aC_4i10ifaNhSDzlU0V3XzV_bOzfz2Fvk3lctRDs"
   );
 }
 
@@ -56,18 +56,19 @@ export default function SubscriptionPage() {
 
     setIsProcessing(planId);
 
-    // NEW: Real payment gateway integration for paid plans
+    // Real payment gateway integration for paid plans
     try {
       toast.info("Contacting payment gateway...");
       const supabase = getSupabaseClient();
 
-      // Call the "create-checkout" edge function to get real Stripe session
+      // Call the "create-checkout" edge function to get Polar payment link
       let priceCents = plans?.find(p => p.id === planId)?.price_cents || 0;
 
       const { data, error } = await supabase.functions.invoke("create-checkout", {
         body: {
           plan_id: planId,
           amount: priceCents,
+          email: authState.user.email, // Pass user email to Polar
         },
       });
 
@@ -75,7 +76,7 @@ export default function SubscriptionPage() {
         throw new Error(error?.message || "Failed to start payment session.");
       }
 
-      window.location.href = data.url; // Redirect to Stripe checkout
+      window.location.href = data.url; // Redirect to Polar checkout
     } catch (e: any) {
       toast.error(e.message || "Could not start payment process.");
       setIsProcessing("");
