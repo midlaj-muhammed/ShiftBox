@@ -15,6 +15,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { createClient } from "@supabase/supabase-js";
+
+// Utility - get supabase client with anon/public key from environment
+function getSupabaseClient() {
+  return createClient(
+    import.meta.env.VITE_SUPABASE_URL,
+    import.meta.env.VITE_SUPABASE_ANON_KEY
+  );
+}
 
 export default function SubscriptionPage() {
   const { authState } = useAuth();
@@ -46,20 +55,31 @@ export default function SubscriptionPage() {
     }
 
     setIsProcessing(planId);
-    
-    // Simulate payment gateway redirect for paid plans
-    toast.info("Redirecting to payment gateway...");
-    
-    // This simulates redirecting to an external payment gateway
-    // In a real implementation, this would redirect to Stripe or another payment processor
-    const paymentPageUrl = `/payment-gateway?plan=${planId}&price=${
-      plans?.find(p => p.id === planId)?.price_cents || 0
-    }`;
-    
-    // Give user time to see the toast before redirect
-    setTimeout(() => {
-      window.location.href = paymentPageUrl;
-    }, 1500);
+
+    // NEW: Real payment gateway integration for paid plans
+    try {
+      toast.info("Contacting payment gateway...");
+      const supabase = getSupabaseClient();
+
+      // Call the "create-checkout" edge function to get real Stripe session
+      let priceCents = plans?.find(p => p.id === planId)?.price_cents || 0;
+
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: {
+          plan_id: planId,
+          amount: priceCents,
+        },
+      });
+
+      if (error || !data?.url) {
+        throw new Error(error?.message || "Failed to start payment session.");
+      }
+
+      window.location.href = data.url; // Redirect to Stripe checkout
+    } catch (e: any) {
+      toast.error(e.message || "Could not start payment process.");
+      setIsProcessing("");
+    }
   };
 
   // Get the selected plan details for confirmation dialog
@@ -125,7 +145,7 @@ export default function SubscriptionPage() {
             <AlertDialogDescription>
               Are you sure you want to {currentPlanId ? "switch to" : "subscribe to"} the {selectedPlan?.name} plan
               {selectedPlan?.price_cents > 0 ? ` for $${(selectedPlan.price_cents / 100).toFixed(2)}` : ""}?
-              {selectedPlan?.price_cents > 0 && <div className="mt-2 font-medium">Your payment information will be collected on the next screen.</div>}
+              {selectedPlan?.price_cents > 0 && <div className="mt-2 font-medium">You will proceed to a secure payment gateway.</div>}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
