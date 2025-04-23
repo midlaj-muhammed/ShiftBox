@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Download } from "lucide-react";
 
 export default function DownloadPage() {
   const { fileId } = useParams<{ fileId: string }>();
@@ -23,7 +24,7 @@ export default function DownloadPage() {
       try {
         // Decode the fileId from the URL
         const decodedFileId = decodeURIComponent(fileId);
-        
+
         // Get public URL from Supabase
         const { data } = supabase.storage.from("user-files").getPublicUrl(decodedFileId);
         if (!data?.publicUrl) {
@@ -63,36 +64,70 @@ export default function DownloadPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center">
-      <div className="w-full max-w-md mx-auto flex flex-col items-center justify-center bg-white border border-border rounded-xl shadow-lg p-8">
-        {isLoading ? (
-          <div className="animate-pulse w-full flex flex-col items-center">
-            <div className="rounded-full bg-gray-200 h-12 w-12 mb-5" />
-            <div className="h-2 bg-gray-200 rounded w-1/2 mb-2" />
-            <div className="h-2 bg-gray-200 rounded w-full" />
+    <div className="min-h-screen bg-gradient-to-br from-[#E5DEFF] via-[#F1F0FB] to-[#D6BCFA] flex items-center justify-center px-4">
+      <div className="max-w-lg w-full bg-white/80 dark:bg-dark/80 rounded-3xl shadow-2xl border border-[#9b87f5]/20 glass-morphism py-12 px-8 md:px-16 flex flex-col items-center animate-fade-in relative">
+        <div className="absolute top-4 left-0 right-0 flex justify-center">
+          <div className="flex items-center gap-2">
+            <img
+              src="/favicon.ico"
+              className="w-8 h-8 rounded-full shadow-lg"
+              alt="ShiftBox Logo"
+            />
+            <span className="font-black text-lg tracking-tight text-[#7E69AB]">ShiftBox</span>
           </div>
-        ) : fileNotFound || !downloadUrl ? (
-          <div className="text-center space-y-4">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-destructive mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <h2 className="text-lg font-semibold">File Not Found</h2>
-            <p className="text-muted-foreground">
-              The file is not available or the link has expired.
-            </p>
+        </div>
+        <div className="mt-10" />
+        <div className="text-center mb-8 space-y-1">
+          <h1 className="text-2xl md:text-3xl font-extrabold text-[#6E59A5]">Your file is ready!</h1>
+          <p className="text-gray-600 text-sm md:text-base">Securely delivered by <span className="text-[#9b87f5] font-semibold">ShiftBox</span>.</p>
+        </div>
+        <div className="flex flex-col items-center justify-center w-full">
+          <div className="bg-gradient-to-br from-[#9b87f5]/80 to-[#7E69AB]/70 p-6 rounded-2xl mb-7 shadow-xl glass-morphism flex flex-col items-center w-full animate-scale-in">
+            <Download size={48} className="text-white drop-shadow mb-3 animate-pulse" strokeWidth={1.5} />
+            {isLoading ? (
+              <div className="w-full flex flex-col items-center">
+                <div className="rounded-full bg-gray-200 h-12 w-12 mb-4 animate-pulse" />
+                <div className="h-2 bg-gray-200 rounded w-1/2 mb-2" />
+                <div className="h-2 bg-gray-200 rounded w-full" />
+              </div>
+            ) : fileNotFound || !downloadUrl ? (
+              <div className="text-center space-y-3 text-[#c94e53]">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <circle cx="12" cy="12" r="10" stroke="#c94e53" strokeWidth="2" fill="none" />
+                  <line x1="12" y1="8" x2="12" y2="12" stroke="#c94e53" strokeWidth="2" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" stroke="#c94e53" strokeWidth="2" />
+                </svg>
+                <h2 className="text-lg font-bold">File Not Found</h2>
+                <p className="text-gray-500 text-sm">
+                  The file is not available or the link has expired.
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="mb-3">
+                  <div className="bg-white text-[#6E59A5] font-semibold rounded px-3 py-2 shadow text-sm">{fileName}</div>
+                </div>
+                <Button
+                  size="lg"
+                  className="text-base font-bold px-8 py-3 rounded-lg shadow-lg bg-gradient-to-r from-[#9b87f5] via-[#7E69AB] to-[#6E59A5] hover:brightness-105 hover:scale-105 duration-150 transition-all w-full"
+                  onClick={handleDownload}
+                  disabled={isDownloading}
+                >
+                  {isDownloading ? "Downloading..." : (
+                    <>
+                      <Download className="mr-2" />Download Now
+                    </>
+                  )}
+                </Button>
+              </>
+            )}
           </div>
-        ) : (
-          <Button
-            size="lg"
-            className="w-full text-base font-semibold px-6 py-3 rounded-lg mt-2"
-            onClick={handleDownload}
-            disabled={isDownloading}
-          >
-            {isDownloading ? "Downloading..." : "Download File"}
-          </Button>
-        )}
+        </div>
+        <div className="w-full mt-7 text-xs text-center text-gray-400">
+          <span>
+            &copy; {new Date().getFullYear()} ShiftBox &mdash; Secure, easy file sharing.
+          </span>
+        </div>
       </div>
     </div>
   );

@@ -3,7 +3,7 @@ import React, { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
-import { Upload, Copy, Link } from "lucide-react";
+import { Upload, Copy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -33,7 +33,7 @@ export default function UploadAndShare() {
       setSelectedFile(null);
     }
   };
-  
+
   const triggerFileInput = () => {
     fileInputRef.current?.click();
   };
@@ -96,7 +96,7 @@ export default function UploadAndShare() {
     setUploading(false);
     setTimeout(() => setProgress(0), 1200);
   };
-  
+
   const copyToClipboard = () => {
     if (publicUrl) {
       navigator.clipboard.writeText(publicUrl);
@@ -142,13 +142,16 @@ export default function UploadAndShare() {
           )}
         </div>
       </div>
-      <Button
-        onClick={handleUpload}
-        disabled={uploading || !selectedFile}
-        className="w-full mt-5"
-      >
-        {uploading ? "Uploading..." : "Upload & Generate Link"}
-      </Button>
+      {/* Move button directly under file area */}
+      <div className="w-full mt-4">
+        <Button
+          onClick={handleUpload}
+          disabled={uploading || !selectedFile}
+          className="w-full"
+        >
+          {uploading ? "Uploading..." : "Upload & Generate Link"}
+        </Button>
+      </div>
       {progress > 0 && (
         <div className="mt-2">
           <Progress value={progress} className="h-2" />
