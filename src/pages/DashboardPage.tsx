@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -8,18 +7,18 @@ import FileCard from "@/components/FileCard";
 import Navbar from "@/components/Navbar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileItem } from "@/types";
+import UploadAndShare from "@/components/UploadAndShare";
 
 export default function DashboardPage() {
   const { authState } = useAuth();
   const { files } = useFiles();
   const [activeTab, setActiveTab] = useState("upload");
+  const [showUploadAndShare, setShowUploadAndShare] = useState(false);
 
-  // Sort files by upload date (newest first)
   const sortedFiles = [...files].sort((a, b) => {
     return new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime();
   });
 
-  // If not authenticated, redirect to login
   if (!authState.isAuthenticated && !authState.isLoading) {
     return <Navigate to="/login" replace />;
   }
@@ -30,6 +29,38 @@ export default function DashboardPage() {
       
       <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
+        
+        <div className="fixed bottom-8 right-8 z-40">
+          <button
+            onClick={() => setShowUploadAndShare(true)}
+            className="bg-primary text-primary-foreground hover:bg-primary/90 px-5 py-3 rounded-full font-medium shadow-lg transition-all"
+            tabIndex={0}
+            aria-label="Upload & Generate Link"
+          >
+            Upload & Generate Link
+          </button>
+        </div>
+        
+        {showUploadAndShare && (
+          <div className="fixed inset-0 bg-black/20 z-50 flex items-center justify-center">
+            <div className="bg-background p-0 rounded-2xl shadow-lg w-full max-w-md">
+              <div className="flex justify-end pt-5 pr-5">
+                <button
+                  onClick={() => setShowUploadAndShare(false)}
+                  className="text-gray-400 hover:text-destructive transition-colors"
+                  aria-label="Close"
+                >
+                  <svg width={24} height={24} viewBox="0 0 24 24" className="w-7 h-7">
+                    <path stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" d="M18 6 6 18M6 6l12 12"/>
+                  </svg>
+                </button>
+              </div>
+              <div className="p-8 pt-2">
+                <UploadAndShare />
+              </div>
+            </div>
+          </div>
+        )}
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full sm:w-80 grid-cols-2">

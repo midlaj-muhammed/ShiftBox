@@ -52,7 +52,6 @@ export default function UploadAndShare() {
     try {
       // Use a unique filename: timestamp + encoded name
       const filePath = `public/${Date.now()}_${encodeURIComponent(selectedFile.name)}`;
-      // Simulate progress UI
       setProgress(10);
       const uploadPromise = supabase
         .storage
@@ -99,19 +98,18 @@ export default function UploadAndShare() {
   };
 
   return (
-    <div className="bg-background rounded-lg border border-border shadow-sm max-w-md mx-auto p-6">
-      <div className="space-y-4">
-        <h3 className="text-xl font-medium">Upload & Share</h3>
-        <p className="text-sm text-muted-foreground">
-          Upload a file and get an instant shareable link
+    <div className="bg-background rounded-xl border border-border max-w-md mx-auto p-0 shadow-none">
+      <div className="space-y-3 mb-2">
+        <h3 className="text-lg font-bold text-foreground mb-1">Upload file &amp; Get Link</h3>
+        <p className="text-sm text-muted-foreground leading-normal mb-2">
+          Select a file to instantly generate a minimalist shareable link.
         </p>
       </div>
-      
       <div 
         onClick={triggerFileInput} 
         className={cn(
-          "mt-6 border-2 border-dashed rounded-lg p-6 text-center cursor-pointer",
-          selectedFile ? "border-primary/30 bg-primary/5" : "border-border hover:border-primary/30"
+          "border-2 border-dashed rounded-xl p-7 text-center cursor-pointer",
+          selectedFile ? "border-primary/40 bg-primary/5" : "border-border hover:border-primary/30"
         )}
       >
         <input
@@ -121,9 +119,8 @@ export default function UploadAndShare() {
           onChange={handleSelect}
           disabled={uploading}
         />
-        
-        <div className="flex flex-col items-center justify-center space-y-2">
-          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
+        <div className="flex flex-col items-center justify-center">
+          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-2">
             <Upload className="h-5 w-5 text-primary" />
           </div>
           {selectedFile ? (
@@ -134,45 +131,36 @@ export default function UploadAndShare() {
           ) : (
             <>
               <p className="font-medium text-sm">Click to select a file</p>
-              <p className="text-xs text-muted-foreground">or drag and drop here</p>
             </>
           )}
         </div>
       </div>
-      
       <Button
         onClick={handleUpload}
         disabled={uploading || !selectedFile}
-        className="w-full mt-6"
+        className="w-full mt-5"
       >
-        {uploading ? "Uploading..." : "Upload"}
+        {uploading ? "Uploading..." : "Upload & Generate Link"}
       </Button>
-      
       {progress > 0 && (
-        <div className="mt-4">
+        <div className="mt-2">
           <Progress value={progress} className="h-2" />
           <div className="text-xs text-right text-muted-foreground mt-1">Progress: {progress}%</div>
         </div>
       )}
-      
       {publicUrl && (
-        <div className="mt-6 space-y-2">
-          <div className="text-sm font-medium">Shareable Link:</div>
-          <div className="flex items-center">
-            <div className="flex-1 bg-muted rounded-l-md p-2 text-sm truncate">
-              <Link className="h-4 w-4 inline mr-2 text-muted-foreground" />
-              <a 
-                href={publicUrl} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-primary hover:underline truncate"
-              >
-                {publicUrl}
-              </a>
-            </div>
+        <div className="mt-5 space-y-2">
+          <div className="text-sm font-bold">Shareable Link</div>
+          <div className="flex items-center border rounded-md overflow-hidden">
+            <input
+              type="text"
+              value={publicUrl}
+              readOnly
+              className="flex-1 text-xs px-3 py-2 bg-muted border-none focus:outline-none truncate"
+            />
             <button 
               onClick={copyToClipboard}
-              className="p-2 rounded-r-md bg-primary text-primary-foreground h-full"
+              className="p-2 bg-primary text-primary-foreground flex items-center justify-center"
               title="Copy link"
             >
               <Copy className="h-4 w-4" />
@@ -180,9 +168,8 @@ export default function UploadAndShare() {
           </div>
         </div>
       )}
-      
       {errorMsg && (
-        <div className="mt-4 text-destructive text-sm bg-destructive/10 p-3 rounded-md">
+        <div className="mt-3 text-destructive text-sm bg-destructive/10 px-4 py-2 rounded-md">
           {errorMsg}
         </div>
       )}
