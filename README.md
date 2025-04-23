@@ -2,6 +2,8 @@
 
 A modern file sharing application built with React, TypeScript, and Supabase that allows users to securely upload, manage, and share files with customizable access controls and subscription-based file limits.
 
+🌐 **[Live Demo](https://shiftbox.netlify.app/)**
+
 ## Features
 
 ### Core Functionality
