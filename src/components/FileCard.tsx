@@ -35,8 +35,8 @@ const formatDate = (dateString: string): string => {
 export default function FileCard({ file }: { file: FileItem }) {
   const { deleteFile, generateFileLink } = useFiles();
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
-  const shareableLink = generateFileLink(file.id);
-  
+  const shareableLink = generateFileLink(file.id, file.name);
+
   const copyToClipboard = () => {
     navigator.clipboard.writeText(shareableLink)
       .then(() => {
@@ -46,7 +46,7 @@ export default function FileCard({ file }: { file: FileItem }) {
         toast.error("Failed to copy link");
       });
   };
-  
+
   // Function to determine icon based on file type
   const getFileIcon = () => {
     if (file.type.startsWith('image/')) {
@@ -89,7 +89,7 @@ export default function FileCard({ file }: { file: FileItem }) {
       );
     }
   };
-  
+
   return (
     <Card className="h-full flex flex-col">
       <CardContent className="pt-6 flex-grow flex flex-col">
@@ -107,7 +107,7 @@ export default function FileCard({ file }: { file: FileItem }) {
           </div>
         </div>
       </CardContent>
-      
+
       <CardFooter className="flex justify-between pt-2 pb-4">
         <Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
           <DialogTrigger asChild>
@@ -120,14 +120,14 @@ export default function FileCard({ file }: { file: FileItem }) {
             <div className="mt-4">
               <p className="text-sm mb-2">Anyone with this link can download the file:</p>
               <div className="flex">
-                <input 
-                  type="text" 
-                  value={shareableLink} 
-                  className="flex-1 px-3 py-2 border rounded-l-md text-sm" 
-                  readOnly 
+                <input
+                  type="text"
+                  value={shareableLink}
+                  className="flex-1 px-3 py-2 border rounded-l-md text-sm"
+                  readOnly
                 />
-                <Button 
-                  className="rounded-l-none" 
+                <Button
+                  className="rounded-l-none"
                   onClick={copyToClipboard}
                 >
                   Copy
@@ -136,10 +136,10 @@ export default function FileCard({ file }: { file: FileItem }) {
             </div>
           </DialogContent>
         </Dialog>
-        
-        <Button 
-          variant="destructive" 
-          size="sm" 
+
+        <Button
+          variant="destructive"
+          size="sm"
           onClick={() => deleteFile(file.id)}
         >
           Delete

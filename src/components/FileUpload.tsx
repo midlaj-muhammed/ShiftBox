@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import fileStore from "@/store/fileStore";
 
 export default function FileUpload() {
   const { uploadFile, isUploading } = useFiles();
@@ -47,34 +46,22 @@ export default function FileUpload() {
       return;
     }
 
-    // Simulate upload progress
-    const interval = setInterval(() => {
-      setUploadProgress(prev => {
-        if (prev >= 95) {
-          clearInterval(interval);
-          return prev;
-        }
-        return prev + 5;
-      });
-    }, 100);
+    // Simulate upload progress locally (real file uploads via supabase)
+    setUploadProgress(20);
+    const progressInterval = setInterval(() => {
+      setUploadProgress(prev => (prev < 85 ? prev + 5 : prev));
+    }, 80);
 
     const uploadedFile = await uploadFile(file);
-    clearInterval(interval);
-    
+    clearInterval(progressInterval);
+
     if (uploadedFile) {
       setUploadProgress(100);
-      // Add to the file store for sharing
-      fileStore.addFile(uploadedFile);
-      
-      // Reset progress after a short delay
-      setTimeout(() => {
-        setUploadProgress(0);
-      }, 1000);
+      setTimeout(() => setUploadProgress(0), 1000);
     } else {
       setUploadProgress(0);
     }
-    
-    // Reset the file input
+
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -103,7 +90,7 @@ export default function FileUpload() {
           className="hidden"
           onChange={handleFileChange}
         />
-        
+
         <div className="flex flex-col items-center justify-center space-y-2">
           <div className="rounded-full bg-primary/10 p-3">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -117,7 +104,7 @@ export default function FileUpload() {
           <p className="text-xs text-gray-400">Maximum file size: 100MB</p>
         </div>
       </div>
-      
+
       {uploadProgress > 0 && (
         <div className="mt-4">
           <div className="flex justify-between text-sm mb-1">
@@ -127,7 +114,7 @@ export default function FileUpload() {
           <Progress value={uploadProgress} className="h-2" />
         </div>
       )}
-      
+
       {isUploading && (
         <div className="flex justify-center mt-4">
           <Button disabled variant="outline">
