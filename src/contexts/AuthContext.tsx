@@ -36,8 +36,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   });
 
   useEffect(() => {
-    // Set up the Supabase auth state listener first.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    // Set up auth state listener FIRST
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) {
         setAuthState({
           isAuthenticated: true,
@@ -53,7 +53,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     });
 
-    // THEN check for an existing session
+    // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setAuthState({
@@ -70,58 +70,89 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     });
 
+    // Cleanup function
     return () => {
-      subscription.unsubscribe();
+      data?.subscription?.unsubscribe?.();
     };
   }, []);
 
   // Login with Supabase
   const login = async (email: string, password: string) => {
-    const { error, data } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      toast.error(error.message || "Failed to login");
+    try {
+      const { error, data } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        toast.error(error.message || "Failed to login");
+        throw error;
+      }
+      
+      if (!data.session || !data.user) {
+        toast.error("Invalid login or incomplete account.");
+        throw new Error("Login failed: No session returned");
+      }
+      
+      toast.success("Login successful!");
+      
+      setAuthState({
+        isAuthenticated: true,
+        user: mapSupabaseUser(data.user),
+        isLoading: false,
+      });
+    } catch (error: any) {
+      console.error("Login error:", error);
       throw error;
     }
-    if (!data.session || !data.user) {
-      toast.error("Invalid login or incomplete account.");
-      throw new Error("Login failed: No session returned");
-    }
-    setAuthState({
-      isAuthenticated: true,
-      user: mapSupabaseUser(data.user),
-      isLoading: false,
-    });
   };
 
   // Signup with Supabase
   const signup = async (email: string, password: string, name?: string) => {
-    const { error, data } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          name,
+    try {
+      const { error, data } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+          },
+          // No email confirmation required
+          emailRedirectTo: window.location.origin + "/login",
         },
-      },
-    });
-    if (error) {
-      toast.error(error.message || "Failed to create account");
+      });
+      
+      if (error) {
+        toast.error(error.message || "Failed to create account");
+        throw error;
+      }
+      
+      if (!data.user) {
+        toast.error("Unexpected error during sign up.");
+        throw new Error("Signup failed: No user returned");
+      }
+      
+      toast.success("Account created successfully! You can now log in.");
+      
+      // Don't automatically set as authenticated if email confirmation is enabled
+      // Instead, redirect to login page
+      setAuthState({
+        isAuthenticated: false,
+        user: null,
+        isLoading: false,
+      });
+    } catch (error: any) {
+      console.error("Signup error:", error);
       throw error;
     }
-    if (!data.user) {
-      toast.error("Unexpected error during sign up.");
-      throw new Error("Signup failed: No user returned");
-    }
-    setAuthState({
-      isAuthenticated: true, // Might require email confirmation if enabled
-      user: mapSupabaseUser(data.user),
-      isLoading: false,
-    });
   };
 
   // Logout with Supabase
   const logout = async () => {
-    await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast.error(error.message || "Error signing out");
+      return;
+    }
+    
+    toast.success("Logged out successfully");
+    
     setAuthState({
       isAuthenticated: false,
       user: null,

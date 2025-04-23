@@ -23,15 +23,18 @@ export default function SignupPage() {
       toast.error("Please fill in all required fields");
       return;
     }
+
+    if (password.length < 8) {
+      toast.error("Password must be at least 8 characters");
+      return;
+    }
     
     setIsLoading(true);
     
     try {
       await signup(email, password, name);
-      toast.success("Account created successfully!");
-      navigate("/dashboard");
+      navigate("/login");
     } catch (error) {
-      toast.error("Failed to create account");
       console.error(error);
     } finally {
       setIsLoading(false);

@@ -27,11 +27,10 @@ export default function LoginPage() {
     
     try {
       await login(email, password);
-      toast.success("Login successful!");
       navigate("/dashboard");
-    } catch (error) {
-      toast.error("Failed to login");
-      console.error(error);
+    } catch (error: any) {
+      // Error is already handled in the login function
+      console.error("Login error details:", error);
     } finally {
       setIsLoading(false);
     }
