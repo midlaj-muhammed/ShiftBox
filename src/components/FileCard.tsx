@@ -36,6 +36,7 @@ export default function FileCard({ file }: { file: FileItem }) {
   const { deleteFile, generateFileLink } = useFiles();
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const shareableLink = generateFileLink(file.id, file.name);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(shareableLink)
@@ -45,6 +46,15 @@ export default function FileCard({ file }: { file: FileItem }) {
       .catch(() => {
         toast.error("Failed to copy link");
       });
+  };
+
+  const handleDelete = async () => {
+    try {
+      setIsDeleting(true);
+      await deleteFile(file.id);
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   // Function to determine icon based on file type
@@ -140,11 +150,12 @@ export default function FileCard({ file }: { file: FileItem }) {
         <Button
           variant="destructive"
           size="sm"
-          onClick={() => deleteFile(file.id)}
+          onClick={handleDelete}
+          disabled={isDeleting}
         >
-          Delete
+          {isDeleting ? "Deleting..." : "Delete"}
         </Button>
       </CardFooter>
     </Card>
   );
-}
+};

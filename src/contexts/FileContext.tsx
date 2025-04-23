@@ -47,9 +47,9 @@ export const FileProvider = ({ children }: { children: ReactNode }) => {
     }
     // Map files to FileItem types
     const mappedFiles: FileItem[] = data?.map((obj) => ({
-      id: obj.id,
+      id: `${authState.user!.id}/${obj.name}`, // Include user ID prefix in the file ID
       name: obj.name,
-      size: obj.metadata?.size || obj.metadata?.mimetype ? 0 : 0,
+      size: obj.metadata?.size || 0,
       type: obj.metadata?.mimetype || "application/octet-stream",
       uploadDate: obj.created_at ?? new Date().toISOString(),
       downloadUrl: supabase.storage.from("user-files").getPublicUrl(`${authState.user?.id}/${obj.name}`).data.publicUrl || "",
@@ -90,7 +90,7 @@ export const FileProvider = ({ children }: { children: ReactNode }) => {
       const publicUrl = supabase.storage.from("user-files").getPublicUrl(uploadPath).data.publicUrl;
 
       const newFile: FileItem = {
-        id: uploadPath, // Use path as unique ID
+        id: uploadPath, // Use path as unique ID which includes userId/filename
         name: file.name,
         size: file.size,
         type: file.type || "application/octet-stream",
@@ -111,14 +111,23 @@ export const FileProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const deleteFile = async (fileId: string) => {
-    // fileId is the storage path (e.g. userId/timestamp_filename)
-    const { error } = await supabase.storage.from("user-files").remove([fileId]);
-    if (error) {
-      toast.error("Failed to delete file");
-      return;
+    // Make sure we're using the correct format for deletion
+    // fileId is the complete storage path (e.g. userId/timestamp_filename)
+    try {
+      const { error } = await supabase.storage.from("user-files").remove([fileId]);
+      
+      if (error) {
+        console.error("Error deleting file:", error);
+        toast.error("Failed to delete file");
+        return;
+      }
+      
+      setFiles(prevFiles => prevFiles.filter(file => file.id !== fileId));
+      toast.success("File deleted");
+    } catch (err) {
+      console.error("Exception during file deletion:", err);
+      toast.error("Failed to delete file due to an exception");
     }
-    setFiles(prevFiles => prevFiles.filter(file => file.id !== fileId));
-    toast.success("File deleted");
   };
 
   const generateFileLink = (fileId: string, fileName: string) => {
