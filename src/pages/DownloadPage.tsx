@@ -4,8 +4,8 @@ import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { FileItem } from "@/types";
-import fileStore from "@/store/fileStore";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 // Helper function to format file size
 const formatFileSize = (bytes: number): string => {
@@ -22,14 +22,51 @@ export default function DownloadPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isDownloading, setIsDownloading] = useState(false);
 
+  // Get file directly from Supabase storage
   useEffect(() => {
-    if (fileId) {
-      const foundFile = fileStore.getFile(fileId);
-      if (foundFile) {
-        setFile(foundFile);
+    async function fetchFileDetails() {
+      if (!fileId) {
+        setIsLoading(false);
+        return;
       }
-      setIsLoading(false);
+      
+      try {
+        // Get file metadata from Supabase storage
+        const { data: fileData, error } = await supabase
+          .storage
+          .from("user-files")
+          .getPublicUrl(fileId);
+          
+        if (error) {
+          console.error("Error fetching file:", error);
+          setIsLoading(false);
+          return;
+        }
+
+        // Extract filename from the path
+        const fileName = fileId.split('/').pop() || "";
+        const decodedFileName = decodeURIComponent(fileName.replace(/^\d+_/, '')); // Remove timestamp prefix
+            
+        // Create FileItem object
+        const fileItem: FileItem = {
+          id: fileId,
+          name: decodedFileName,
+          size: 0, // Size not available without additional API call
+          type: "", // Type not available without additional API call
+          uploadDate: new Date().toISOString(),
+          downloadUrl: fileData.publicUrl,
+          userId: fileId.split('/')[0] || "",
+        };
+        
+        setFile(fileItem);
+      } catch (error) {
+        console.error("Error processing file data:", error);
+      } finally {
+        setIsLoading(false);
+      }
     }
+    
+    fetchFileDetails();
   }, [fileId]);
 
   const handleDownload = () => {
@@ -59,7 +96,13 @@ export default function DownloadPage() {
   const getFileIcon = () => {
     if (!file) return null;
 
-    if (file.type.startsWith('image/')) {
+    // Infer type from filename if available
+    const extension = file.name.split('.').pop()?.toLowerCase() || '';
+    const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(extension);
+    const isVideo = ['mp4', 'webm', 'ogg', 'mov', 'avi'].includes(extension);
+    const isPdf = extension === 'pdf';
+
+    if (isImage) {
       return (
         <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-blue-500 mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
@@ -67,7 +110,7 @@ export default function DownloadPage() {
           <polyline points="21 15 16 10 5 21"></polyline>
         </svg>
       );
-    } else if (file.type.startsWith('video/')) {
+    } else if (isVideo) {
       return (
         <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-red-500 mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
@@ -80,7 +123,7 @@ export default function DownloadPage() {
           <line x1="17" y1="7" x2="22" y2="7"></line>
         </svg>
       );
-    } else if (file.type === 'application/pdf') {
+    } else if (isPdf) {
       return (
         <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-orange-500 mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
