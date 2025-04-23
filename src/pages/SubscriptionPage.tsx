@@ -46,14 +46,20 @@ export default function SubscriptionPage() {
     }
 
     setIsProcessing(planId);
-    // This is where Polar Payments integration would happen (pseudo, since not real API)
-    // You would open the payment modal, get Stripe token/session, etc. We'll simulate for now.
-    setTimeout(async () => {
-      toast.success(`Subscribed to plan: ${planId}!`);
-      // Refetch subscription info
-      await refetch();
-      setIsProcessing("");
-    }, 1200);
+    
+    // Simulate payment gateway redirect for paid plans
+    toast.info("Redirecting to payment gateway...");
+    
+    // This simulates redirecting to an external payment gateway
+    // In a real implementation, this would redirect to Stripe or another payment processor
+    const paymentPageUrl = `/payment-gateway?plan=${planId}&price=${
+      plans?.find(p => p.id === planId)?.price_cents || 0
+    }`;
+    
+    // Give user time to see the toast before redirect
+    setTimeout(() => {
+      window.location.href = paymentPageUrl;
+    }, 1500);
   };
 
   // Get the selected plan details for confirmation dialog
