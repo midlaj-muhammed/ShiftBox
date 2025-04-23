@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { Upload } from "lucide-react";
 
 export default function FileUpload() {
   const { uploadFile, isUploading } = useFiles();
@@ -72,12 +73,14 @@ export default function FileUpload() {
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto mt-8">
+    <div className="w-full max-w-xl mx-auto">
       <div
         className={cn(
-          "border-2 border-dashed rounded-lg p-8 transition-all",
-          isDragging ? "border-primary bg-primary/5" : "border-gray-300 hover:border-primary",
-          "text-center cursor-pointer"
+          "border-2 border-dashed rounded-lg transition-all",
+          isDragging 
+            ? "border-primary bg-primary/5" 
+            : "border-border hover:border-primary/50",
+          "text-center cursor-pointer p-8 bg-background"
         )}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -91,17 +94,13 @@ export default function FileUpload() {
           onChange={handleFileChange}
         />
 
-        <div className="flex flex-col items-center justify-center space-y-2">
+        <div className="flex flex-col items-center justify-center space-y-3">
           <div className="rounded-full bg-primary/10 p-3">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="17 8 12 3 7 8"></polyline>
-              <line x1="12" y1="3" x2="12" y2="15"></line>
-            </svg>
+            <Upload className="h-8 w-8 text-primary" />
           </div>
           <h3 className="font-medium text-lg">Drag & drop your file here</h3>
-          <p className="text-sm text-gray-500">or click to browse files</p>
-          <p className="text-xs text-gray-400">Maximum file size: 100MB</p>
+          <p className="text-sm text-muted-foreground">or click to browse files</p>
+          <p className="text-xs text-muted-foreground">Maximum file size: 100MB</p>
         </div>
       </div>
 
@@ -117,8 +116,8 @@ export default function FileUpload() {
 
       {isUploading && (
         <div className="flex justify-center mt-4">
-          <Button disabled variant="outline">
-            Uploading...
+          <Button disabled variant="outline" className="text-sm">
+            Processing...
           </Button>
         </div>
       )}
