@@ -105,18 +105,20 @@ export default function UploadAndShare() {
   };
 
   return (
-    <div className="bg-background rounded-xl border border-border max-w-md mx-auto p-0 shadow-none">
-      <div className="space-y-3 mb-2">
-        <h3 className="text-lg font-bold text-foreground mb-1">Upload file &amp; Get Link</h3>
-        <p className="text-sm text-muted-foreground leading-normal mb-2">
-          Select a file to instantly generate a minimalist shareable link.
+    <div className="bg-background/80 backdrop-blur-sm rounded-xl border border-primary/10 max-w-xl mx-auto p-0 shadow-none">
+      <div className="space-y-3 mb-6">
+        <h3 className="text-xl font-bold font-space text-foreground mb-1">Upload file &amp; Get Link</h3>
+        <p className="text-foreground/70 leading-relaxed mb-2">
+          Select a file to instantly generate a shareable link for secure file transfer.
         </p>
       </div>
-      <div 
-        onClick={triggerFileInput} 
+      <div
+        onClick={triggerFileInput}
         className={cn(
-          "border-2 border-dashed rounded-xl p-7 text-center cursor-pointer",
-          selectedFile ? "border-primary/40 bg-primary/5" : "border-border hover:border-primary/30"
+          "border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all duration-300",
+          selectedFile
+            ? "border-primary/40 bg-primary/5 shadow-inner"
+            : "border-primary/20 hover:border-primary/50 hover:bg-primary/5"
         )}
       >
         <input
@@ -127,59 +129,72 @@ export default function UploadAndShare() {
           disabled={uploading}
         />
         <div className="flex flex-col items-center justify-center">
-          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-2">
-            <Upload className="h-5 w-5 text-primary" />
+          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4 shadow-md shadow-primary/10">
+            <Upload className="h-7 w-7 text-primary" />
           </div>
           {selectedFile ? (
             <>
-              <span className="font-medium text-sm">{selectedFile.name}</span>
-              <span className="text-xs text-muted-foreground">({formatFileSize(selectedFile.size)})</span>
+              <span className="font-medium text-base font-space">{selectedFile.name}</span>
+              <span className="text-sm text-foreground/60 mt-1 bg-primary/5 px-3 py-0.5 rounded-full">
+                {formatFileSize(selectedFile.size)}
+              </span>
             </>
           ) : (
             <>
-              <p className="font-medium text-sm">Click to select a file</p>
+              <p className="font-medium text-base font-space">Click to select a file</p>
+              <p className="text-sm text-foreground/60 mt-2">or drag and drop</p>
             </>
           )}
         </div>
       </div>
       {/* Move button directly under file area */}
-      <div className="w-full mt-4">
+      <div className="w-full mt-6">
         <Button
           onClick={handleUpload}
           disabled={uploading || !selectedFile}
-          className="w-full"
+          className="w-full rounded-full px-6 py-6 h-auto font-medium text-base bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all duration-300"
         >
           {uploading ? "Uploading..." : "Upload & Generate Link"}
         </Button>
       </div>
       {progress > 0 && (
-        <div className="mt-2">
-          <Progress value={progress} className="h-2" />
-          <div className="text-xs text-right text-muted-foreground mt-1">Progress: {progress}%</div>
+        <div className="mt-4">
+          <Progress value={progress} className="h-2 bg-secondary/50" />
+          <div className="text-sm text-right text-foreground/60 mt-2 font-medium">Progress: {progress}%</div>
         </div>
       )}
       {publicUrl && (
-        <div className="mt-5 space-y-2">
-          <div className="text-sm font-bold">Shareable Link</div>
-          <div className="flex items-center border rounded-md overflow-hidden">
+        <div className="mt-8 space-y-3 bg-primary/5 p-4 rounded-xl border border-primary/10">
+          <div className="text-base font-bold font-space flex items-center gap-2">
+            <div className="w-5 h-5 bg-primary/20 rounded-full flex items-center justify-center">
+              <span className="animate-ping absolute inline-flex h-3 w-3 rounded-full bg-primary opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+            </div>
+            Shareable Link Ready
+          </div>
+          <div className="flex items-center border border-primary/20 rounded-lg overflow-hidden bg-background/80">
             <input
               type="text"
               value={publicUrl}
               readOnly
-              className="flex-1 text-xs px-3 py-2 bg-muted border-none focus:outline-none truncate"
+              className="flex-1 text-sm px-4 py-3 bg-transparent border-none focus:outline-none truncate"
             />
-            <button 
+            <button
               onClick={copyToClipboard}
-              className="p-2 bg-primary text-primary-foreground flex items-center justify-center"
+              className="p-3 bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90 transition-colors"
               title="Copy link"
             >
-              <Copy className="h-4 w-4" />
+              <Copy className="h-5 w-5" />
             </button>
           </div>
+          <p className="text-sm text-foreground/60 mt-2">
+            This link will allow anyone to download your file securely.
+          </p>
         </div>
       )}
       {errorMsg && (
-        <div className="mt-3 text-destructive text-sm bg-destructive/10 px-4 py-2 rounded-md">
+        <div className="mt-4 text-destructive text-sm bg-destructive/10 px-5 py-3 rounded-xl border border-destructive/20">
+          <div className="font-bold mb-1">Error</div>
           {errorMsg}
         </div>
       )}
