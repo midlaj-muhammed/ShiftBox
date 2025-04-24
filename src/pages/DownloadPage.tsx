@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -68,11 +67,28 @@ export default function DownloadPage() {
       <div className="max-w-lg w-full bg-white/80 dark:bg-dark/80 rounded-3xl shadow-2xl border border-[#9b87f5]/20 glass-morphism py-12 px-8 md:px-16 flex flex-col items-center animate-fade-in relative">
         <div className="absolute top-4 left-0 right-0 flex justify-center">
           <div className="flex items-center gap-2">
-            <img
-              src="/favicon.ico"
-              className="w-8 h-8 rounded-full shadow-lg"
-              alt="ShiftBox Logo"
-            />
+            <svg
+              width="32"
+              height="32"
+              viewBox="0 0 32 32"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-8 h-8 rounded-full shadow-lg bg-white p-1"
+            >
+              <path
+                d="M16 2C8.268 2 2 8.268 2 16s6.268 14 14 14 14-6.268 14-14S23.732 2 16 2z"
+                fill="#7E69AB"
+                fillOpacity="0.1"
+              />
+              <path
+                d="M22 10h-4v12h4c1.1 0 2-.9 2-2V12c0-1.1-.9-2-2-2z"
+                fill="#7E69AB"
+              />
+              <path
+                d="M14 10H9c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h5V10z"
+                fill="#9b87f5"
+              />
+            </svg>
             <span className="font-black text-lg tracking-tight text-[#7E69AB]">ShiftBox</span>
           </div>
         </div>
