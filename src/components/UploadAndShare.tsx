@@ -69,7 +69,7 @@ export default function UploadAndShare() {
         setProgress(prev => (prev < 90 ? prev + 10 : prev));
       }, 100);
 
-      const { data, error } = await uploadPromise;
+      const { error } = await uploadPromise;
       clearInterval(timer);
 
       if (error) {
@@ -79,17 +79,11 @@ export default function UploadAndShare() {
         return;
       }
       setProgress(100);
-      // Get the public URL
-      const { data: urlData } = supabase
-        .storage
-        .from("user-files")
-        .getPublicUrl(filePath);
-      if (!urlData?.publicUrl) {
-        setErrorMsg("Failed to generate public URL.");
-      } else {
-        setPublicUrl(window.location.origin + "/download/" + encodeURIComponent(filePath));
-        toast.success("File uploaded successfully!");
-      }
+      
+      // Generate download URL using our application's path structure
+      const downloadUrl = `${window.location.origin}/download/${encodeURIComponent(filePath)}`;
+      setPublicUrl(downloadUrl);
+      toast.success("File uploaded successfully!");
     } catch (err: any) {
       setErrorMsg(err?.message || "Unexpected error.");
     }
