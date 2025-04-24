@@ -35,28 +35,42 @@ export const FileProvider = ({ children }: { children: ReactNode }) => {
       setFiles([]);
       return;
     }
-    const { data, error } = await supabase
-      .storage
-      .from("user-files")
-      .list(authState.user.id + "/", { limit: 100, sortBy: { column: "created_at", order: "desc" } });
+    
+    try {
+      const { data, error } = await supabase
+        .storage
+        .from("user-files")
+        .list(authState.user.id + "/", { limit: 100, sortBy: { column: "created_at", order: "desc" } });
 
-    if (error) {
-      console.error("Error fetching files:", error);
+      if (error) {
+        console.error("Error fetching files:", error);
+        setFiles([]);
+        return;
+      }
+      
+      // Map files to FileItem types
+      const mappedFiles: FileItem[] = await Promise.all(
+        data?.map(async (obj) => {
+          const filePath = `${authState.user!.id}/${obj.name}`;
+          const { data: urlData } = supabase.storage.from("user-files").getPublicUrl(filePath);
+          
+          return {
+            id: filePath, // Include user ID prefix in the file ID
+            name: obj.name.replace(/^\d+_/, ""), // Remove timestamp prefix from display name
+            size: obj.metadata?.size || 0,
+            type: obj.metadata?.mimetype || "application/octet-stream",
+            uploadDate: obj.created_at ?? new Date().toISOString(),
+            downloadUrl: urlData?.publicUrl || "",
+            userId: authState.user!.id,
+          };
+        }) || []
+      );
+
+      setFiles(mappedFiles);
+    } catch (error) {
+      console.error("Error in fetchFiles:", error);
       setFiles([]);
-      return;
     }
-    // Map files to FileItem types
-    const mappedFiles: FileItem[] = data?.map((obj) => ({
-      id: `${authState.user!.id}/${obj.name}`, // Include user ID prefix in the file ID
-      name: obj.name,
-      size: obj.metadata?.size || 0,
-      type: obj.metadata?.mimetype || "application/octet-stream",
-      uploadDate: obj.created_at ?? new Date().toISOString(),
-      downloadUrl: supabase.storage.from("user-files").getPublicUrl(`${authState.user?.id}/${obj.name}`).data.publicUrl || "",
-      userId: authState.user!.id,
-    })) ?? [];
-
-    setFiles(mappedFiles);
   };
 
   useEffect(() => {
@@ -73,7 +87,9 @@ export const FileProvider = ({ children }: { children: ReactNode }) => {
     setIsUploading(true);
 
     try {
-      const uploadPath = `${authState.user.id}/${Date.now()}_${encodeURIComponent(file.name)}`;
+      const sanitizedFileName = file.name.replace(/[^\w\s.-]/g, "_");
+      const uploadPath = `${authState.user.id}/${Date.now()}_${sanitizedFileName}`;
+      
       const { data, error } = await supabase.storage
         .from("user-files")
         .upload(uploadPath, file, {
@@ -86,11 +102,12 @@ export const FileProvider = ({ children }: { children: ReactNode }) => {
         return null;
       }
 
-      // Get info from uploaded file
-      const publicUrl = supabase.storage.from("user-files").getPublicUrl(uploadPath).data.publicUrl;
+      // Get direct public URL from Supabase
+      const { data: urlData } = supabase.storage.from("user-files").getPublicUrl(uploadPath);
+      const publicUrl = urlData?.publicUrl || "";
 
       const newFile: FileItem = {
-        id: uploadPath, // Use path as unique ID which includes userId/filename
+        id: uploadPath,
         name: file.name,
         size: file.size,
         type: file.type || "application/octet-stream",
@@ -98,6 +115,7 @@ export const FileProvider = ({ children }: { children: ReactNode }) => {
         downloadUrl: publicUrl,
         userId: authState.user.id,
       };
+      
       setFiles(prevFiles => [newFile, ...prevFiles]);
       toast.success("File uploaded successfully");
       return newFile;
@@ -111,8 +129,6 @@ export const FileProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const deleteFile = async (fileId: string) => {
-    // Make sure we're using the correct format for deletion
-    // fileId is the complete storage path (e.g. userId/timestamp_filename)
     try {
       const { error } = await supabase.storage.from("user-files").remove([fileId]);
       
@@ -131,8 +147,9 @@ export const FileProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const generateFileLink = (fileId: string, fileName: string) => {
-    // fileId is the storage path, so just build using fileId
-    return supabase.storage.from("user-files").getPublicUrl(fileId).data.publicUrl;
+    // Use direct download URL from Supabase instead of app routes
+    const { data } = supabase.storage.from("user-files").getPublicUrl(fileId);
+    return data?.publicUrl || "";
   };
 
   return (

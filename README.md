@@ -1,6 +1,8 @@
-# 🚀 File Share Now
+# 🚀 ShiftBox
 
 A modern file sharing application built with React, TypeScript, and Supabase that allows users to securely upload, manage, and share files with customizable access controls and subscription-based file limits.
+
+🌐 **[Live Demo](https://shift-box.vercel.app/)**
 
 ## ✨ Features
 
@@ -42,7 +44,6 @@ A modern file sharing application built with React, TypeScript, and Supabase tha
 - Node.js 18+ & npm (recommended: install with [nvm](https://github.com/nvm-sh/nvm#installing-and-updating))
 - Supabase account (for backend services)
 - Stripe account (optional, for payment processing)
-
 ### ⚙️ Environment Setup
 Create a `.env` file in the project root with your Supabase credentials:
 ```
@@ -53,7 +54,7 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 ### 💾 Installation
 Clone the repository and install dependencies:
 ```sh
-git clone <YOUR_GIT_URL>
+git clone https://github.com/midlaj-muhammed/ShiftBox
 cd file-share-now
 npm install
 ```

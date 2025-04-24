@@ -57,8 +57,11 @@ export default function UploadAndShare() {
         setUploading(false);
         return;
       }
-      // Use a unique filename with user ID prefix to ensure proper organization
-      const filePath = `${authState.user.id}/${Date.now()}_${encodeURIComponent(selectedFile.name)}`;
+
+      // Sanitize the file name to avoid URL encoding issues
+      const sanitizedFileName = selectedFile.name.replace(/[^\w\s.-]/g, "_");
+      const filePath = `${authState.user.id}/${Date.now()}_${sanitizedFileName}`;
+      
       setProgress(10);
       const uploadPromise = supabase
         .storage
@@ -69,7 +72,7 @@ export default function UploadAndShare() {
         setProgress(prev => (prev < 90 ? prev + 10 : prev));
       }, 100);
 
-      const { data, error } = await uploadPromise;
+      const { error } = await uploadPromise;
       clearInterval(timer);
 
       if (error) {
@@ -79,17 +82,12 @@ export default function UploadAndShare() {
         return;
       }
       setProgress(100);
-      // Get the public URL
-      const { data: urlData } = supabase
-        .storage
-        .from("user-files")
-        .getPublicUrl(filePath);
-      if (!urlData?.publicUrl) {
-        setErrorMsg("Failed to generate public URL.");
-      } else {
-        setPublicUrl(window.location.origin + "/download/" + encodeURIComponent(filePath));
-        toast.success("File uploaded successfully!");
-      }
+      
+      // Get direct public URL from Supabase
+      const { data } = supabase.storage.from("user-files").getPublicUrl(filePath);
+      setPublicUrl(data?.publicUrl || null);
+      
+      toast.success("File uploaded successfully!");
     } catch (err: any) {
       setErrorMsg(err?.message || "Unexpected error.");
     }
