@@ -21,10 +21,8 @@ export default function DownloadPage() {
         return;
       }
       try {
-        // Decode the fileId from the URL
         const decodedFileId = decodeURIComponent(fileId);
         
-        // First check if the file exists
         const { data: fileExists, error: checkError } = await supabase
           .storage
           .from("user-files")
@@ -40,7 +38,6 @@ export default function DownloadPage() {
           return;
         }
 
-        // Get public URL directly from Supabase
         const { data } = supabase.storage.from("user-files").getPublicUrl(decodedFileId);
         
         if (!data?.publicUrl) {
@@ -50,12 +47,9 @@ export default function DownloadPage() {
           return;
         }
         
-        // Use the Supabase storage URL directly
         setDownloadUrl(data.publicUrl);
         
-        // Extract file name from the path for download attribute
         const fileNameParsed = decodedFileId.split('/').pop() || "downloaded_file";
-        // Remove timestamp prefix from display name if present
         const cleanFileName = fileNameParsed.replace(/^\d+_/, "");
         setFileName(cleanFileName);
         setFileNotFound(false);
