@@ -1,31 +1,31 @@
-# ShiftBox
+# 🚀 File Share Now
 
 A modern file sharing application built with React, TypeScript, and Supabase that allows users to securely upload, manage, and share files with customizable access controls and subscription-based file limits.
 
 🌐 **[Live Demo](https://shiftbox.netlify.app/)**
 
-## Features
+## ✨ Features
 
-### Core Functionality
-- Drag-and-drop file uploads with progress tracking
-- Secure file storage with Supabase Storage
-- Instant file sharing via public URLs
-- File management dashboard
-- 100MB file size limit per upload
+### ⚡ Core Functionality
+- 📤 Drag-and-drop file uploads with progress tracking
+- 🔒 Secure file storage with Supabase Storage
+- 🔗 Instant file sharing via public URLs
+- 🗂️ File management dashboard
+- 📏 100MB file size limit per upload
 
-### User Management
-- Complete authentication system (signup, login, password reset)
-- User profile management
-- Subscription tiers with different file limits
-- Payment processing integration with Stripe
+### 👤 User Management
+- 🔑 Complete authentication system (signup, login, password reset)
+- 📝 User profile management
+- 🪙 Subscription tiers with different file limits
+- 💳 Payment processing integration with Stripe
 
-### UI/UX
-- Modern, responsive design using Tailwind CSS
-- Polished component library with shadcn/ui
-- Toast notifications for user feedback
-- Drag-and-drop interface for intuitive file uploads
+### 🎨 UI/UX
+- 🖌️ Modern, responsive design using Tailwind CSS
+- 🧩 Polished component library with shadcn/ui
+- 🔔 Toast notifications for user feedback
+- 🖱️ Drag-and-drop interface for intuitive file uploads
 
-## Tech Stack
+## 🛠️ Tech Stack
 
 - **Frontend**: React 18 with TypeScript
 - **Styling**: Tailwind CSS with shadcn/ui components
@@ -36,51 +36,51 @@ A modern file sharing application built with React, TypeScript, and Supabase tha
 - **Form Handling**: React Hook Form with Zod validation
 - **Payments**: Stripe integration via Supabase Functions
 
-## Project Info
+## ℹ️ Project Info
 
-## Getting Started
+## 🚦 Getting Started
 
-### Prerequisites
+### 📋 Prerequisites
 - Node.js 18+ & npm (recommended: install with [nvm](https://github.com/nvm-sh/nvm#installing-and-updating))
 - Supabase account (for backend services)
 - Stripe account (optional, for payment processing)
 
-### Environment Setup
+### ⚙️ Environment Setup
 Create a `.env` file in the project root with your Supabase credentials:
 ```
 VITE_SUPABASE_URL=your_supabase_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
-### Installation
+### 💾 Installation
 Clone the repository and install dependencies:
 ```sh
-git clone https://github.com/midlaj-muhammed/ShiftBox.git
+git clone https://github.com/midlaj-muhammed/ShiftBox
 cd file-share-now
 npm install
 ```
 
-### Running the Application
+### ▶️ Running the Application
 Start the development server with auto-reloading and instant preview:
 ```sh
 npm run dev
 ```
 The application will be available at http://localhost:5173 by default.
 
-## Usage
+## 📁 Usage
 
-### Upload Files
+### ⬆️ Upload Files
 1. Navigate to the Dashboard
 2. Select the "Upload" tab
 3. Drag & drop files or click to browse
 4. Files up to 100MB are supported
 
-### Share Files
+### 🔗 Share Files
 1. After uploading, copy the generated sharing link
 2. Share the link with anyone who needs access to the file
 3. Recipients can download the file directly without creating an account
 
-## Project Structure
+## 🗂️ Project Structure
 
 ```
 src/
@@ -105,7 +105,7 @@ src/
 └── types/            # TypeScript type definitions
 ```
 
-## Supabase Configuration
+## 🛡️ Supabase Configuration
 
 This application uses Supabase for:
 
@@ -124,7 +124,7 @@ To configure your own Supabase instance:
 
 The application can be deployed to various hosting platforms:
 
-### Netlify/Vercel Deployment
+### 🌐 Netlify/Vercel Deployment
 
 1. Build the production version:
    ```sh
@@ -135,13 +135,13 @@ The application can be deployed to various hosting platforms:
 
 3. Configure environment variables in your hosting dashboard
 
-## Editing the Code
+## ✏️ Editing the Code
 You can edit the application in several ways:
 
 - **Use your preferred IDE:** Clone this repo, make changes locally, and push updates.
 - **Edit directly in GitHub:** Navigate to the desired file(s) and click the "Edit" button (pencil icon) at the top right of the file view.
 
-## Contributing
+## 🤝 Contributing
 
 Contributions are welcome! Please follow these steps:
 
@@ -153,42 +153,66 @@ Contributions are welcome! Please follow these steps:
 
 Please ensure your code adheres to the existing style and includes appropriate tests.
 
-## License
+## 📄 License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-## Contact & Support
+## 📬 Contact & Support
 
 - For support or questions, please open an issue in the GitHub repository
 
-## Technology Stack Details
+## 🧑‍💻 Technology Stack Details
 
 This project leverages the following technologies:
 
-### Core Framework
+### 🏗️ Core Framework
 - **React 18** - Modern UI library with hooks for efficient state management
 - **TypeScript** - Static typing for improved developer experience and code quality
 - **Vite** - Next-generation frontend build tool with fast HMR (Hot Module Replacement)
 
-### UI Framework
+### 🎨 UI Framework
 - **Tailwind CSS** - Utility-first CSS framework for rapid UI development
 - **shadcn/ui** - High-quality React components built with Radix UI and Tailwind
 - **Lucide React** - Beautiful, consistent icon set
 
-### Backend Services
+### 🗄️ Backend Services
 - **Supabase** - Open-source Firebase alternative providing:
   - Authentication with multiple providers
   - PostgreSQL database
   - Storage for file management
   - Edge Functions for serverless compute
 
-### State Management
+### 🔄 State Management
 - **React Context API** - For application-wide state management
 - **TanStack React Query** - For server state management and data fetching
 
-### Forms & Validation
+### 📝 Forms & Validation
 - **React Hook Form** - Performance-focused form handling
 - **Zod** - Schema validation with TypeScript integration
 
-### Routing
+### 🛣️ Routing
 - **React Router Dom v6** - Declarative routing for React applications
+
+## 🚚 Deployment Options
+
+### ⚡ Standard Deployment
+
+1. Build the production version:
+   ```sh
+   npm run build
+   ```
+
+2. Deploy the `dist` directory to any static hosting provider:
+   - Vercel
+   - Netlify
+   - GitHub Pages
+   - AWS S3 + CloudFront
+
+3. Set up environment variables for your Supabase credentials
+
+### Custom Domain Setup
+
+Most hosting providers allow you to configure custom domains:
+1. Purchase a domain from a domain registrar (like Namecheap, GoDaddy, Google Domains)
+2. Configure the DNS settings to point to your hosting provider
+3. Set up SSL certificates for secure HTTPS connections
