@@ -49,20 +49,22 @@ export const FileProvider = ({ children }: { children: ReactNode }) => {
       }
       
       // Map files to FileItem types
-      const mappedFiles: FileItem[] = data?.map((obj) => {
-        const filePath = `${authState.user!.id}/${obj.name}`;
-        const { data: urlData } = supabase.storage.from("user-files").getPublicUrl(filePath);
-        
-        return {
-          id: filePath, // Include user ID prefix in the file ID
-          name: obj.name.replace(/^\d+_/, ""), // Remove timestamp prefix from display name
-          size: obj.metadata?.size || 0,
-          type: obj.metadata?.mimetype || "application/octet-stream",
-          uploadDate: obj.created_at ?? new Date().toISOString(),
-          downloadUrl: urlData?.publicUrl || "",
-          userId: authState.user!.id,
-        };
-      }) ?? [];
+      const mappedFiles: FileItem[] = await Promise.all(
+        data?.map(async (obj) => {
+          const filePath = `${authState.user!.id}/${obj.name}`;
+          const { data: urlData } = supabase.storage.from("user-files").getPublicUrl(filePath);
+          
+          return {
+            id: filePath, // Include user ID prefix in the file ID
+            name: obj.name.replace(/^\d+_/, ""), // Remove timestamp prefix from display name
+            size: obj.metadata?.size || 0,
+            type: obj.metadata?.mimetype || "application/octet-stream",
+            uploadDate: obj.created_at ?? new Date().toISOString(),
+            downloadUrl: urlData?.publicUrl || "",
+            userId: authState.user!.id,
+          };
+        }) || []
+      );
 
       setFiles(mappedFiles);
     } catch (error) {
@@ -85,7 +87,9 @@ export const FileProvider = ({ children }: { children: ReactNode }) => {
     setIsUploading(true);
 
     try {
-      const uploadPath = `${authState.user.id}/${Date.now()}_${encodeURIComponent(file.name)}`;
+      const sanitizedFileName = file.name.replace(/[^\w\s.-]/g, "_");
+      const uploadPath = `${authState.user.id}/${Date.now()}_${sanitizedFileName}`;
+      
       const { data, error } = await supabase.storage
         .from("user-files")
         .upload(uploadPath, file, {
@@ -143,8 +147,9 @@ export const FileProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const generateFileLink = (fileId: string, fileName: string) => {
-    // Generate download link using app's URL structure
-    return `${window.location.origin}/download/${encodeURIComponent(fileId)}`;
+    // Use direct download URL from Supabase instead of app routes
+    const { data } = supabase.storage.from("user-files").getPublicUrl(fileId);
+    return data?.publicUrl || "";
   };
 
   return (

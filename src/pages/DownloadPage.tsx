@@ -39,8 +39,10 @@ export default function DownloadPage() {
         setDownloadUrl(data.publicUrl);
         
         // Extract file name from the path for download attribute
-        const fileNameParsed = decodeURIComponent((decodedFileId.split('/').pop() ?? "downloaded_file").replace(/^\d+_/, ""));
-        setFileName(fileNameParsed);
+        const fileNameParsed = decodedFileId.split('/').pop() || "downloaded_file";
+        // Remove timestamp prefix from display name if present
+        const cleanFileName = fileNameParsed.replace(/^\d+_/, "");
+        setFileName(cleanFileName);
         setFileNotFound(false);
       } catch (error) {
         console.error("Error fetching file:", error);
@@ -75,6 +77,7 @@ export default function DownloadPage() {
       <div className="max-w-lg w-full bg-white/80 dark:bg-dark/80 rounded-3xl shadow-2xl border border-[#9b87f5]/20 glass-morphism py-12 px-8 md:px-16 flex flex-col items-center animate-fade-in relative">
         <div className="absolute top-4 left-0 right-0 flex justify-center">
           <div className="flex items-center gap-2">
+            {/* Inline SVG to avoid favicon.ico issues */}
             <svg
               width="32"
               height="32"
