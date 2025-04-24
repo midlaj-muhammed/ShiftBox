@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -39,9 +38,7 @@ export default function DownloadPage() {
           return;
         }
 
-        const { data } = supabase.storage.from("user-files").getPublicUrl(decodedFileId, {
-          download: true, // This forces the 'Content-Disposition: attachment' header
-        });
+        const { data } = supabase.storage.from("user-files").getPublicUrl(decodedFileId);
         
         if (!data?.publicUrl) {
           console.error("No public URL found for file", decodedFileId);
@@ -71,7 +68,7 @@ export default function DownloadPage() {
     try {
       const link = document.createElement('a');
       link.href = downloadUrl;
-      link.download = fileName; // Forces download instead of navigation
+      link.download = fileName;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

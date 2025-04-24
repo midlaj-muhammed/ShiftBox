@@ -83,10 +83,9 @@ export default function UploadAndShare() {
       }
       setProgress(100);
       
-      // Create a download page URL instead of a direct file URL
-      const appUrl = window.location.origin;
-      const downloadPageUrl = `${appUrl}/download/${encodeURIComponent(filePath)}`;
-      setPublicUrl(downloadPageUrl);
+      // Get direct public URL from Supabase
+      const { data } = supabase.storage.from("user-files").getPublicUrl(filePath);
+      setPublicUrl(data?.publicUrl || null);
       
       toast.success("File uploaded successfully!");
     } catch (err: any) {
